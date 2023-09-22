@@ -1,24 +1,24 @@
-import { useEffect, useRef, useState, Fragment } from "react";
+import { Fragment, useEffect, useRef, useState } from "react";
 import SocialLogin from "@biconomy/web3-auth";
-import { ethers } from "ethers";
 import { ChainId } from "@biconomy/core-types";
-import { bundler, paymaster } from "./constants";
+import { ethers, providers } from "ethers";
 import {
   BiconomySmartAccount,
   BiconomySmartAccountConfig,
 } from "@biconomy/account";
+import { bundler, paymaster } from "./constants";
 import Transfer from "./Transfer";
 
 export default function Wallet() {
   const sdkRef = useRef<SocialLogin | null>(null);
   const [interval, enableInterval] = useState<boolean>(false);
-  const [loading, setLoading] = useState(false);
-  const [, setProvider] = useState<ethers.providers.Web3Provider>();
+  const [loading, setLoading] = useState<boolean>(false);
+  const [, setProvider] = useState<providers.Web3Provider>();
   const [smartAccount, setSmartAccount] = useState<BiconomySmartAccount>();
 
-  // login() function
   async function login() {
-    if (!!sdkRef.current) {
+    // If the SDK has not been initialized yet, initialize it
+    if (!sdkRef.current) {
       const socialLoginSDK = new SocialLogin();
       await socialLoginSDK.init({
         chainId: ethers.utils.hexValue(ChainId.POLYGON_MUMBAI).toString(),
@@ -26,15 +26,28 @@ export default function Wallet() {
       });
       sdkRef.current = socialLoginSDK;
     }
-    if (!sdkRef.current?.provider) {
-      sdkRef.current?.showWallet();
+
+    // If the SDK is set up, but the provider is not set, start the timer to set up a smart account
+    if (!sdkRef.current.provider) {
+      sdkRef.current.showWallet();
       enableInterval(true);
     } else {
-      // console.log("hello");
       setupSmartAccount();
     }
   }
-  // setupSmartAccount() function
+
+  async function logOut() {
+    // Log out of the smart account
+    await sdkRef.current?.logout();
+
+    // Hide the wallet
+    sdkRef.current?.hideWallet();
+
+    // Reset state and stop the interval if it was started
+    setSmartAccount(undefined);
+    enableInterval(false);
+  }
+
   async function setupSmartAccount() {
     try {
       // If the SDK hasn't fully initialized, return early
@@ -46,10 +59,10 @@ export default function Wallet() {
       // Start the loading indicator
       setLoading(true);
 
+      // Initialize the smart account
       let web3Provider = new ethers.providers.Web3Provider(
         sdkRef.current?.provider
       );
-
       setProvider(web3Provider);
       const config: BiconomySmartAccountConfig = {
         signer: web3Provider.getSigner(),
@@ -67,18 +80,6 @@ export default function Wallet() {
     }
 
     setLoading(false);
-  }
-
-  async function logOut() {
-    // Log out of the smart account
-    await sdkRef.current?.logout();
-
-    // Hide the wallet
-    sdkRef.current?.hideWallet();
-
-    // Reset state and stop the interval if it was started
-    setSmartAccount(undefined);
-    enableInterval(false);
   }
 
   useEffect(() => {
@@ -109,7 +110,7 @@ export default function Wallet() {
         <h1 className=" text-4xl text-gray-50 font-bold tracking-tight lg:text-5xl">
           Send ERC20 using ERC20
         </h1>
-        import Transfer from "./Transfer";
+
         {/* Login Button */}
         {!smartAccount && !loading && (
           <button
@@ -119,11 +120,12 @@ export default function Wallet() {
             Login
           </button>
         )}
+
         {/* Loading state */}
         {loading && <p>Loading account details...</p>}
+
         {smartAccount && (
           <Fragment>
-            {" "}
             <Transfer smartAccount={smartAccount} />
           </Fragment>
         )}
