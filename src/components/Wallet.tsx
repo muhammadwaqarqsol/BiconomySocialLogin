@@ -18,7 +18,7 @@ export default function Wallet() {
 
   // login() function
   async function login() {
-    if (!sdkRef.current) {
+    if (!!sdkRef.current) {
       const socialLoginSDK = new SocialLogin();
       await socialLoginSDK.init({
         chainId: ethers.utils.hexValue(ChainId.POLYGON_MUMBAI).toString(),
