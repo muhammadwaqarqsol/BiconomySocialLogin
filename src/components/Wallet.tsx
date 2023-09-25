@@ -1,60 +1,49 @@
-import { Fragment, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, Fragment } from "react";
 import SocialLogin from "@biconomy/web3-auth";
+import { ethers } from "ethers";
 import { ChainId } from "@biconomy/core-types";
-import { ethers, providers } from "ethers";
+import { bundler, paymaster } from "./constants";
+import Transfer from "./Transfer";
 import {
   BiconomySmartAccount,
   BiconomySmartAccountConfig,
 } from "@biconomy/account";
-import { bundler, paymaster } from "./constants";
-import Transfer from "./Transfer";
 
 export default function Wallet() {
   const sdkRef = useRef<SocialLogin | null>(null);
   const [interval, enableInterval] = useState<boolean>(false);
-  const [loading, setLoading] = useState<boolean>(false);
-  const [, setProvider] = useState<providers.Web3Provider>();
+  const [loading, setLoading] = useState(false);
+  const [, setProvider] = useState<ethers.providers.Web3Provider>();
   const [smartAccount, setSmartAccount] = useState<BiconomySmartAccount>();
 
+  // login() function
   async function login() {
-    // If the SDK has not been initialized yet, initialize it
+    console.log("Interval", interval);
+    console.log("sdk", sdkRef);
     if (!sdkRef.current) {
       const socialLoginSDK = new SocialLogin();
-      const signature2 = await socialLoginSDK.whitelistUrl(
-        "biconomy-social-login-ck2k0ltm9-muhammad-waqar-uit.vercel.app"
+      const signature1 = await socialLoginSDK.whitelistUrl(
+        "https://biconomy-social-logins-git-master-usman-2000.vercel.app"
       );
       await socialLoginSDK.init({
         chainId: ethers.utils.hexValue(ChainId.POLYGON_MUMBAI).toString(),
         network: "testnet",
         whitelistUrls: {
-          "biconomy-social-login-git-main-muhammad-waqar-uit.vercel.app":
-            signature2,
+          "account-abstraction-next-js-app-git-main-muhammad-waqar-uit.vercel.app":
+            signature1,
         },
       });
       sdkRef.current = socialLoginSDK;
     }
-
-    // If the SDK is set up, but the provider is not set, start the timer to set up a smart account
     if (!sdkRef.current?.provider) {
-      sdkRef.current.showWallet();
+      sdkRef.current?.showWallet();
       enableInterval(true);
     } else {
+      console.log("hello");
       setupSmartAccount();
     }
   }
-
-  async function logOut() {
-    // Log out of the smart account
-    await sdkRef.current?.logout();
-
-    // Hide the wallet
-    sdkRef.current?.hideWallet();
-
-    // Reset state and stop the interval if it was started
-    setSmartAccount(undefined);
-    enableInterval(false);
-  }
-
+  // setupSmartAccount() function
   async function setupSmartAccount() {
     try {
       // If the SDK hasn't fully initialized, return early
@@ -89,6 +78,18 @@ export default function Wallet() {
     setLoading(false);
   }
 
+  async function logOut() {
+    // Log out of the smart account
+    await sdkRef.current?.logout();
+
+    // Hide the wallet
+    sdkRef.current?.hideWallet();
+
+    // Reset state and stop the interval if it was started
+    setSmartAccount(undefined);
+    enableInterval(false);
+  }
+
   useEffect(() => {
     let configureLogin: NodeJS.Timeout | undefined;
     if (interval) {
@@ -100,7 +101,6 @@ export default function Wallet() {
       }, 1000);
     }
   }, [interval]);
-
   return (
     <Fragment>
       {/* Logout Button */}
@@ -133,6 +133,7 @@ export default function Wallet() {
 
         {smartAccount && (
           <Fragment>
+            {" "}
             <Transfer smartAccount={smartAccount} />
           </Fragment>
         )}
