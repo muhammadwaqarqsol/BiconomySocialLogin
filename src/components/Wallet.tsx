@@ -39,7 +39,7 @@ export default function Wallet() {
     }
 
     // If the SDK is set up, but the provider is not set, start the timer to set up a smart account
-    if (!sdkRef.current.provider) {
+    if (!sdkRef.current?.provider) {
       sdkRef.current.showWallet();
       enableInterval(true);
     } else {
