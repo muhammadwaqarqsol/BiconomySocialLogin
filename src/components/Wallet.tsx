@@ -24,14 +24,14 @@ export default function Wallet() {
         "http://localhost:3000"
       );
       const signature2 = await socialLoginSDK.whitelistUrl(
-        "biconomy-social-login-78st1g5d8-muhammad-waqar-uit.vercel.app"
+        "biconomy-social-login-git-main-muhammad-waqar-uit.vercel.app"
       );
       await socialLoginSDK.init({
         chainId: ethers.utils.hexValue(ChainId.POLYGON_MUMBAI).toString(),
         network: "testnet",
         whitelistUrls: {
           "https:localhost:3000": signature1,
-          "biconomy-social-login-78st1g5d8-muhammad-waqar-uit.vercel.app":
+          "biconomy-social-login-git-main-muhammad-waqar-uit.vercel.app":
             signature2,
         },
       });
