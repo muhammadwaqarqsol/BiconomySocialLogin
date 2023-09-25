@@ -23,13 +23,13 @@ export default function Wallet() {
     if (!sdkRef.current) {
       const socialLoginSDK = new SocialLogin();
       const signature1 = await socialLoginSDK.whitelistUrl(
-        "https://biconomy-social-logins-git-master-usman-2000.vercel.app"
+        "https://biconomy-social-login-git-main-muhammad-waqar-uit.vercel.app"
       );
       await socialLoginSDK.init({
         chainId: ethers.utils.hexValue(ChainId.POLYGON_MUMBAI).toString(),
         network: "testnet",
         whitelistUrls: {
-          "account-abstraction-next-js-app-git-main-muhammad-waqar-uit.vercel.app":
+          "https://biconomy-social-login-git-main-muhammad-waqar-uit.vercel.app":
             signature1,
         },
       });
