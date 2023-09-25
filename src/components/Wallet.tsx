@@ -20,9 +20,19 @@ export default function Wallet() {
     // If the SDK has not been initialized yet, initialize it
     if (!sdkRef.current) {
       const socialLoginSDK = new SocialLogin();
+      const signature1 = await socialLoginSDK.whitelistUrl(
+        "http://localhost:3000"
+      );
+      const signature2 = await socialLoginSDK.whitelistUrl(
+        "https://biconomy-social-login.vercel.app"
+      );
       await socialLoginSDK.init({
         chainId: ethers.utils.hexValue(ChainId.POLYGON_MUMBAI).toString(),
         network: "testnet",
+        whitelistUrls: {
+          "https:localhost:3000": signature1,
+          "https://biconomy-social-login.vercel.app/": signature2,
+        },
       });
       sdkRef.current = socialLoginSDK;
     }
